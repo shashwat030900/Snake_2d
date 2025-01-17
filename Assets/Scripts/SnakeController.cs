@@ -41,14 +41,16 @@ public class SnakeController : MonoBehaviour
     
 
 
-   
+    private List <Transform> segements; 
     public float moveSpeed = 5f;        
     private Vector2 direction = Vector2.right;   
     private Rigidbody2D rb2d;
     private Vector2 targetPosition;
+    public Transform PrefabSegement;
     void Start()
     {
-        
+        segements = new List<Transform>();
+        segements.Add(this.transform);
         rb2d = GetComponent<Rigidbody2D>();
     }
 
@@ -85,6 +87,12 @@ public class SnakeController : MonoBehaviour
         {
 
             rb2d.velocity = direction * moveSpeed;
+        }
+
+        private void GrowSnake(){
+            Transform segement = Instantiate(this.PrefabSegement);
+            segement.position = segements[segements.Count - 1].position;
+            segements.Add(segement);
         }
 
 }
