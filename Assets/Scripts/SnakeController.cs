@@ -5,42 +5,6 @@ using UnityEngine;
 
 public class SnakeController : MonoBehaviour
 {
-    //private Vector2 direction = Vector2.right;
-    //public float speed = 5f;
-
-
-    //void Update()
-    //{
-    //    if(Input.GetKeyDown(KeyCode.W))
-    //    {
-    //        direction = Vector2.up;
-    //    }
-    //    else if (Input.GetKeyDown(KeyCode.S))
-    //    {
-    //        direction = Vector2.down;
-    //    }
-    //    else if (Input.GetKeyDown(KeyCode.A))
-    //    {
-    //        direction = Vector2.left;
-    //    }
-    //    else if (Input.GetKeyDown(KeyCode.D))
-    //    {
-    //        direction = Vector2.right;
-    //    }
-    //}
-
-    //private void FixedUpdate()
-    //{
-    //    this.transform.position = new Vector3(
-    //        Mathf.Round(this.transform.position.x) + direction.x * speed * Time.deltaTime,
-    //        Mathf.Round(this.transform.position.y) + direction.y * speed * Time.deltaTime,
-    //        0.00f
-    //     );
-
-    //}
-    
-
-
     private List <Transform> segements; 
     public float moveSpeed = 5f;        
     private Vector2 direction = Vector2.right;   
@@ -85,14 +49,48 @@ public class SnakeController : MonoBehaviour
 
         void FixedUpdate()
         {
-
+            for(int i = segements.Count - 1; i > 0; i--){
+                segements[i].position = segements[i -1 ].position; 
+            }
             rb2d.velocity = direction * moveSpeed;
+            Teleport();
         }
 
         private void GrowSnake(){
             Transform segement = Instantiate(this.PrefabSegement);
             segement.position = segements[segements.Count - 1].position;
             segements.Add(segement);
+        }
+
+        void OnTriggerEnter2D(Collider2D other)
+        {
+            if (other.tag == "Food"){
+                GrowSnake(); 
+            }
+        }
+
+        private void Teleport()
+        {
+            float screenHeight = Camera.main.orthographicSize;
+            float screenWidth = screenHeight * Camera.main.aspect;
+
+            Vector3 position = transform.position;
+
+            if (position.x > screenWidth){
+                position.x = -screenWidth;
+            }
+            else if (position.x < -screenWidth){
+                position.x = screenWidth;
+            }
+
+            if(position.y > screenHeight){
+                position.y = -screenHeight;
+            }
+
+            else if (position.y < -screenHeight){
+                position.y = screenHeight;
+            }
+            transform.position = position;
         }
 
 }
