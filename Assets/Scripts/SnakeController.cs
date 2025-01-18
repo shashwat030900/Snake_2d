@@ -67,6 +67,9 @@ public class SnakeController : MonoBehaviour
             if (other.tag == "Food"){
                 GrowSnake(); 
             }
+             if (other.tag == "Obstacle"){
+                ResetGame();
+            }
         }
 
         private void Teleport()
@@ -91,6 +94,17 @@ public class SnakeController : MonoBehaviour
                 position.y = screenHeight;
             }
             transform.position = position;
+        }
+
+        private void ResetGame()
+        {
+            for (int i = 1; i < segements.Count; i++){
+                Destroy(segements[i].gameObject);
+            }
+
+            segements.Clear();
+            segements.Add(this.transform);
+            this.transform.position = Vector3.zero;
         }
 
 }
