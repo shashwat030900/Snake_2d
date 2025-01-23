@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
+using UnityEngine.Video;
 
 public class MainPlayerController : MonoBehaviour
 {
-    private List <Transform> segements; 
+    private List <Transform> segements = new List<Transform>();
     public float moveSpeed = 5f;        
     private Vector2 direction = Vector2.right;   
     private Rigidbody2D rb2d;
@@ -18,11 +19,20 @@ public class MainPlayerController : MonoBehaviour
     private float originalSpeed;
     public PowerUps powerUps;
     public ScoreController scoreController;
+    public int initialSize = 4;
+
+    //snake head direction.
+    private Vector2 lastDirection ; 
+    // snake body
+    [SerializeField] private GameObject segmentPrefab;
+
+    
     void Start()
     {
-        segements = new List<Transform>();
-        segements.Add(this.transform);
+
+        ResetGame();
         rb2d = GetComponent<Rigidbody2D>();
+        targetPosition = transform.position;
     }
     void Awake()
     {
@@ -37,21 +47,25 @@ public class MainPlayerController : MonoBehaviour
 
     private void SnakeMovement()
     {
-        if (Input.GetKeyDown(KeyCode.W))
+        if (Input.GetKeyDown(KeyCode.W)&& lastDirection != Vector2.down)
         {
             direction = Vector2.up;
+            lastDirection = direction;
         }
-        else if (Input.GetKeyDown(KeyCode.S))
+        else if (Input.GetKeyDown(KeyCode.S) && lastDirection != Vector2.up)
         {
             direction = Vector2.down;
+            lastDirection = direction;
         }
-        else if (Input.GetKeyDown(KeyCode.A))
+        else if (Input.GetKeyDown(KeyCode.A) && lastDirection != Vector2.right)
         {
             direction = Vector2.left;
+            lastDirection = direction;
         }
-        else if (Input.GetKeyDown(KeyCode.D))
+        else if (Input.GetKeyDown(KeyCode.D) && lastDirection != Vector2.left)
         {
             direction = Vector2.right;
+            lastDirection = direction;
         }
         if (Vector2.Distance(transform.position, targetPosition) < 0.1f)
         {
@@ -60,21 +74,41 @@ public class MainPlayerController : MonoBehaviour
                 Mathf.Round(transform.position.x) + direction.x,
                 Mathf.Round(transform.position.y) + direction.y
                 );
+                Debug.Log($"traget position : {targetPosition} ");
         }
+                lastDirection = direction;
+
     }
+
+    private void MoveBody(){
+        for( int i  = segements.Count - 1; i > 0; i--){
+            segements[i].position = segements[i-1].position;
+        }
+        transform.position = targetPosition;
+        
+    }
+
+    public void AddSegment(){
+        Transform newSegment = Instantiate(segmentPrefab, segements[segements.Count - 1].position, Quaternion.identity).transform;
+        segements.Add(newSegment);
+    }
+
+        
 
         void FixedUpdate()
         {
             for(int i = segements.Count - 1; i > 0; i--){
-                segements[i].position = segements[i -1 ].position; 
+                segements[i].position = segements[i -1 ].position;
             }
             rb2d.velocity = direction * moveSpeed;
             Teleport();
+            MoveBody();
+
         }
 
         private void GrowSnake(){
             Transform segement = Instantiate(this.PrefabSegement);
-            segement.position = segements[segements.Count - 1].position;
+            segement.position = segements[segements.Count - 50].position - (Vector3)direction;
             segements.Add(segement);
             
         }
@@ -83,13 +117,14 @@ public class MainPlayerController : MonoBehaviour
         {
             if (other.tag == "Food"){
                 
-                GrowSnake(); 
+                //GrowSnake();
+                AddSegment(); 
                 scoreController.IncreaseScore(10);
                 Debug.Log("food");
             }
             else if (other.tag == "Obstacle"){
                 
-                ResetGame();
+                //ResetGame();
                 Debug.Log("Obstacle");
             }
             else if(other.tag == "Shield"){
@@ -147,7 +182,13 @@ public class MainPlayerController : MonoBehaviour
 
             segements.Clear();
             segements.Add(this.transform);
+
+            for(int i = 1; i < this.initialSize; i++)
+                {
+                    segements.Add(Instantiate(this.PrefabSegement));
+                }
             this.transform.position = Vector3.zero;
+
         }
 
 }
