@@ -163,6 +163,7 @@ MonoBehaviour:
   powerUps: {fileID: 216460646}
   scoreController: {fileID: 555248468}
   initialSize: 20
+  segmentPrefab: {fileID: 0}
 --- !u!61 &200725750
 BoxCollider2D:
   m_ObjectHideFlags: 0
